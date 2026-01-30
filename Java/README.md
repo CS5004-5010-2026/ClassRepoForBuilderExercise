@@ -1,258 +1,163 @@
-# Connect-N Game Model
+# Connect-N Game Model - Java Starter Code
 
-A fully-tested Java implementation of a configurable Connect-N game model demonstrating the need for the Builder pattern.
+A fully-tested Java implementation of a configurable Connect-N game model. Your task is to implement the Builder pattern to improve the API.
 
 ## Overview
 
-This project implements a Connect-N game where two players attempt to connect N tokens in a row (horizontally, vertically, or diagonally). The implementation intentionally uses a multi-parameter constructor to demonstrate a design problem that the Builder pattern solves—students will later refactor this code.
+This project implements a Connect-N game where two players attempt to connect N tokens in a row (horizontally, vertically, or diagonally). The implementation uses a multi-parameter constructor that demonstrates a design problem—you will implement the Builder pattern to solve it.
 
-## Features
+## What's Provided
 
-- **Configurable Board**: Specify rows, columns, and win length
-- **Complete Game Logic**: Move validation, win detection (4 directions), draw detection
-- **Immutable Design**: Defensive copying prevents external state modification
-- **Comprehensive Testing**: Both unit tests (JUnit 5) and property-based tests (jqwik)
-- **No I/O**: Pure model suitable for any interface (console, GUI, web)
+- **Complete Game Model**: `ConnectNGame` class with full game logic
+- **Supporting Classes**: `Player` enum, `GameStatus` enum
+- **Comprehensive Tests**: 61 unit tests + 19 property-based tests (all passing)
+- **Build System**: Gradle configuration
 
-## Building
+## Your Task
 
-This project uses Gradle. To build:
+Implement a `ConnectNGameBuilder` class that provides a fluent API for creating game instances.
 
-```bash
-./gradlew build
-```
+### Requirements
 
-## Running the Demo
+1. **Fluent API with method chaining**:
+   - `rows(int)` - set number of rows
+   - `columns(int)` - set number of columns
+   - `winLength(int)` - set win length
+   - `boardSize(int)` - set square board (rows = columns)
+   - `squareBoard(int, int)` - set square board with win length
+   - `build()` - create the game instance
 
-To see a comparison of the constructor vs builder approaches:
+2. **Default values**: 3×3 board, win length 3
 
-```bash
-./gradlew run
-```
+3. **Validation**: Ensure valid configurations before building
 
-This runs the `BuilderDemo` program which demonstrates the advantages of the Builder pattern.
+4. **Factory methods** (static methods that return pre-configured games):
+   - `ticTacToe()` - 3×3, win 3
+   - `connectFour()` - 6×7, win 4
+   - `gomoku()` - 15×15, win 5
+   - `smallGame()` - 5×5, win 3
+   - `largeGame()` - 10×10, win 5
+   - `customSquare(int size, int winLength)` - custom square board
 
-## Testing
+5. **Tests**: Write comprehensive tests in `ConnectNGameBuilderTest.java`
 
-Run all tests:
-
-```bash
-./gradlew test
-```
-
-The project includes:
-- **82 unit tests**: Specific examples and edge cases (61 for ConnectNGame + 21 for Builder)
-- **19 property-based tests**: Universal correctness properties tested with 100+ iterations each
-
-## Usage Examples
-
-### Tic-Tac-Toe (3×3, win length 3)
+### Example Usage (What You Should Implement)
 
 ```java
-ConnectNGame game = new ConnectNGame(3, 3, 3);
-
-// Make moves
-game.makeMove(0, 0);  // Player 1 (X) at top-left
-game.makeMove(1, 1);  // Player 2 (O) at center
-game.makeMove(0, 1);  // Player 1 (X)
-game.makeMove(1, 0);  // Player 2 (O)
-game.makeMove(0, 2);  // Player 1 (X) - wins!
-
-// Check game state
-if (game.isGameOver()) {
-    Player winner = game.getWinner();
-    if (winner != null) {
-        System.out.println(winner + " wins!");
-    } else {
-        System.out.println("Draw!");
-    }
-}
-```
-
-### Connect Four-like (6×7, win length 4)
-
-```java
-ConnectNGame game = new ConnectNGame(6, 7, 4);
-
-// Players alternate placing tokens
-game.makeMove(0, 0);
-game.makeMove(0, 1);
-// ... continue playing ...
-
-// Reset for a new game
-game.reset();
-```
-
-## Design Notes
-
-### Intentional Anti-Pattern
-
-This implementation uses a **multi-parameter constructor**:
-
-```java
-ConnectNGame game = new ConnectNGame(6, 7, 4);
-```
-
-**Problems with this approach:**
-1. Parameter order is easy to confuse (rows vs columns)
-2. No way to add optional parameters (e.g., starting player, custom tokens)
-3. No way to provide default values
-4. Difficult to create common configurations
-5. Constructor calls are verbose and unclear
-
-### Solution: Builder Pattern
-
-The `ConnectNGameBuilder` class provides a better alternative:
-
-```java
-// Clear, readable API
+// Using fluent API
 ConnectNGame game = new ConnectNGameBuilder()
     .rows(6)
     .columns(7)
     .winLength(4)
     .build();
 
-// Or use convenient presets
+// Using factory methods
 ConnectNGame ticTacToe = ConnectNGameBuilder.ticTacToe();
 ConnectNGame connectFour = ConnectNGameBuilder.connectFour();
-ConnectNGame gomoku = ConnectNGameBuilder.gomoku();
 
-// Flexible parameter order
-ConnectNGame game2 = new ConnectNGameBuilder()
-    .winLength(4)
-    .columns(7)
-    .rows(6)
+// Using convenience methods
+ConnectNGame square = new ConnectNGameBuilder()
+    .squareBoard(5, 4)  // 5×5 board, win length 4
     .build();
-
-// Default values (3x3, win length 3)
-ConnectNGame defaultGame = new ConnectNGameBuilder().build();
 ```
 
-**Benefits of the Builder Pattern:**
-- Self-documenting code (parameter names are clear)
+## Building
+
+```bash
+./gradlew build
+```
+
+## Testing
+
+Run the existing tests to verify the game model works:
+
+```bash
+./gradlew test
+```
+
+The project includes:
+- **61 unit tests**: Specific examples and edge cases for ConnectNGame
+- **19 property-based tests**: Universal correctness properties
+
+After implementing your Builder, add tests for it and run again.
+
+## The Problem: Multi-Parameter Constructor
+
+The current `ConnectNGame` constructor has several issues:
+
+```java
+ConnectNGame game = new ConnectNGame(6, 7, 4);
+// Is it (rows, columns, winLength) or (columns, rows, winLength)?
+// What if I want default values?
+// How do I create common configurations easily?
+```
+
+**Problems**:
+- Parameter order is confusing
+- No default values
+- Can't skip parameters
+- Not self-documenting
+- Hard to add optional parameters later
+
+## The Solution: Builder Pattern
+
+Your Builder implementation should solve these problems by providing:
+- Clear, self-documenting API
 - Flexible parameter order
-- Default values for common configurations
-- Easy to add optional parameters in the future
-- Named factory methods for standard games
-- Backward compatible when adding new features
+- Default values
+- Easy-to-use factory methods
+- Extensibility for future parameters
 
-See [BUILDER_PATTERN_DEMO.md](BUILDER_PATTERN_DEMO.md) for a detailed comparison.
+## Project Structure
 
-## API Reference
+```
+Java/
+├── src/
+│   ├── main/java/connectn/
+│   │   ├── ConnectNGame.java      # Complete game model
+│   │   ├── Player.java            # Player enum
+│   │   └── GameStatus.java        # Game status enum
+│   └── test/java/connectn/
+│       ├── ConnectNGameTest.java          # Unit tests
+│       └── ConnectNGamePropertyTest.java  # Property-based tests
+├── build.gradle
+└── README.md
+```
 
-### Constructor (Original)
+## Game Model API
+
+### ConnectNGame Constructor
 
 ```java
 public ConnectNGame(int rows, int columns, int winLength)
 ```
 
-Creates a new game with specified dimensions and win condition.
+### Key Methods
 
-### Builder (Recommended)
+- `makeMove(int column)` - Make a move in the specified column
+- `getStatus()` - Get current game status (IN_PROGRESS, X_WON, O_WON, DRAW)
+- `getCurrentPlayer()` - Get current player (X or O)
+- `getBoard()` - Get copy of current board state
+- `getRows()`, `getColumns()`, `getWinLength()` - Get configuration
 
-```java
-ConnectNGameBuilder builder = new ConnectNGameBuilder()
+## Testing Your Implementation
+
+When you implement your Builder, write tests that verify:
+
+1. **Fluent API works**: Method chaining returns builder
+2. **Default values**: Building without setting values uses defaults
+3. **Validation**: Invalid configurations throw exceptions
+4. **Factory methods**: All presets create correct configurations
+5. **Build creates correct game**: Resulting game has expected configuration
+
+## Solution
+
+Check the `solutions` branch to see a complete reference implementation:
+
+```bash
+git checkout solutions
 ```
 
-Creates a builder with default values (3x3 board, win length 3).
+## License
 
-**Builder Methods:**
-- `rows(int rows)` - Set number of rows
-- `columns(int columns)` - Set number of columns
-- `winLength(int winLength)` - Set win length
-- `boardSize(int rows, int columns)` - Set both dimensions at once
-- `squareBoard(int size)` - Create square board
-- `build()` - Build the ConnectNGame instance
-
-**Preset Factory Methods:**
-- `ConnectNGameBuilder.ticTacToe()` - 3×3, win length 3
-- `ConnectNGameBuilder.connectFour()` - 6×7, win length 4
-- `ConnectNGameBuilder.gomoku()` - 15×15, win length 5
-- `ConnectNGameBuilder.smallGame()` - 5×5, win length 4
-- `ConnectNGameBuilder.largeGame()` - 10×10, win length 5
-- `ConnectNGameBuilder.customSquare(int size, int winLength)` - Custom square board
-
-### Game Actions
-
-- `void makeMove(int row, int col)` - Make a move for the current player
-- `boolean isValidMove(int row, int col)` - Check if a move is valid
-- `void reset()` - Reset the game to initial state
-
-### Game State
-
-- `char[][] getBoard()` - Get a copy of the board
-- `Player getCurrentPlayer()` - Get the current player
-- `GameStatus getGameStatus()` - Get the game status
-- `Player getWinner()` - Get the winner (if any)
-- `boolean isGameOver()` - Check if the game has ended
-
-### Configuration
-
-- `int getRows()` - Get the number of rows
-- `int getColumns()` - Get the number of columns
-- `int getWinLength()` - Get the win length
-
-## Testing Strategy
-
-The implementation uses a dual testing approach:
-
-1. **Unit Tests (JUnit 5)**: Specific examples demonstrating correct behavior
-2. **Property-Based Tests (jqwik)**: Universal properties tested across randomized inputs
-
-### Correctness Properties
-
-The implementation validates 19 correctness properties:
-- Constructor validation (4 properties)
-- Initial state (1 property)
-- Board updates and defensive copying (2 properties)
-- Player switching (1 property)
-- Move validation (4 properties)
-- Win detection (4 properties)
-- Draw detection (1 property)
-- Game reset (1 property)
-- No winner for non-winning games (1 property)
-
-## Project Structure
-
-```
-ClassRepoForBuilderExercise/
-├── build.gradle              # Gradle build configuration
-├── settings.gradle           # Project settings
-├── gradlew                   # Gradle wrapper (Unix)
-├── gradlew.bat              # Gradle wrapper (Windows)
-├── gradle/                  # Gradle wrapper files
-├── README.md                # This file
-├── BUILDER_PATTERN_DEMO.md  # Detailed Builder pattern comparison
-└── src/
-    ├── main/java/connectn/
-    │   ├── ConnectNGame.java        # Main game model
-    │   ├── ConnectNGameBuilder.java # Builder pattern implementation
-    │   ├── Player.java              # Player enum
-    │   ├── GameStatus.java          # Game status enum
-    │   └── BuilderDemo.java         # Demo program
-    └── test/java/connectn/
-        ├── ConnectNGameTest.java            # Unit tests for game
-        ├── ConnectNGamePropertyTest.java    # Property-based tests for game
-        └── ConnectNGameBuilderTest.java     # Unit tests for builder
-```
-
-## Dependencies
-
-- **Java 17**: Target platform
-- **JUnit 5**: Unit testing framework
-- **jqwik 1.8.2**: Property-based testing library
-
-## Code Quality
-
-- **Google Java Style Guide**: All code follows standard conventions
-- **Comprehensive Javadoc**: All public classes and methods documented
-- **High Test Coverage**: >90% line coverage
-- **No I/O**: Pure model with no System.out, Scanner, or file operations
-
-## Author
-
-CS5004 Teaching Team
-
-## Version
-
-1.0
+Educational use only - CS5004-5010-2026
