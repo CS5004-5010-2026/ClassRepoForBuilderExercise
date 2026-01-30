@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+application {
+    mainClass = 'connectn.BuilderDemo'
+}
+
+group = 'edu.neu.cs5004'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit 5
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    // jqwik for property-based testing
+    testImplementation 'net.jqwik:jqwik:1.8.2'
+}
+
+test {
+    useJUnitPlatform()
+    
+    // Include both JUnit and jqwik tests
+    include '**/*Test.class'
+    include '**/*PropertyTest.class'
+    
+    // Show test results
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
